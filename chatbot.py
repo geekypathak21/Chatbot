@@ -110,3 +110,33 @@ answerints2word={w_i:w for w,w_i in answerwords2int.items()}
 #Adding the end of string token to the end of every answer    
 for i in range(len(clean_answers)):
     clean_answers[i]+='<EOS>'
+""" Translating all the questions and answers in to integers and replacing 
+     all the words that were filtered out by<OUT>"""
+question_to_int = []
+for question in clean_question:
+    ints = []
+    for word in question.split():
+        if word not in questionwords2int:
+            ints.append(questionwords2int['<OUT>'])
+        else:
+            ints.append(questionwords2int[word])
+    question_to_int.append(ints)
+
+answer_to_int = []
+for answer in clean_answers:
+    ints = []
+    for word in answer.split():
+        if word not in answerwords2int:
+            ints.append(answerwords2int['<OUT>'])
+        else:
+            ints.append(answerwords2int[word])
+    answer_to_int.append(ints)
+#Sorting questions and answers by the length of question
+sorted_clean_questions = []
+sorted_clean_answers = []
+for length in range(1,25+1):
+    for i in enumerate(question_to_int):
+        if len(i[1]) == length:
+            sorted_clean_questions.append(question_to_int[i[0]])
+            sorted_clean_answers.append(answer_to_int[i[0]])
+     
