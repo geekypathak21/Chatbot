@@ -139,4 +139,52 @@ for length in range(1,25+1):
         if len(i[1]) == length:
             sorted_clean_questions.append(question_to_int[i[0]])
             sorted_clean_answers.append(answer_to_int[i[0]])
-     
+            
+ #Training The SEQ2SEQ model
+epochs = 100
+batch_size = 64
+rnn_size = 512
+num_layers = 3
+encoding_embedding_size = 512
+decoding_embedding_size = 512
+learning_rate = 0.01
+learning_rate_decay = 0.9
+min_learning_rate = 0.0001
+keep_probability = 0.5
+
+#Defining a session
+tf.reset_default_graph()
+session = tf.InteractiveSession()
+
+#Loading the model inputs
+inputs, targets, lr, keep_prob = model_input()
+
+#Setting the sequence length
+sequence_length = tf.placeholder_with_default(25, None, name = 'sequence_length')
+
+#Getting the shape of input tensor
+input_shape = tf.shape(inputs)
+
+#Getting the training and test predictions
+training_predictions, test_predictions = seq2seq_model(tf.reverse(inputs[-1]),
+                                                       keep_prob,
+                                                       batch_size,
+                                                       sequence_length,
+                                                       len(answerwords2int),
+                                                       len(questionwords2int),
+                                                       encoding_embedding_size,
+                                                       decoding_embedding_size,
+                                                       rnn_size,
+                                                       num_layers,
+                                                       questionwords2int)
+#Setting up the loss error,the optimizer gradient clipping
+with tf.name_scope("optimization"):
+    loss_error = tf.contrib.seq2seq.Sequence_loss(training_predictions,targets,tf.ones([input_shape[0],sequence_length]))
+    optimizer = tf.train.AdamOptimizer(learning_rate)
+    gradients = optimizer.compute_gradients(loss_error)
+    clipped_gradients = [((tf.clip_by_value(grad_tensor),-5.,5.),grad_variable) for grad_tensor,grad_variable in gradients if grad_tensor is not None]
+    optimize_gradient_clipping = optimizer.apply_gradients(clipped_gradients)
+#Padding the sequence with the <PAD> token
+def apply_padding(batch_of_sequences, word2int):
+    max_sequence_length = max([(sequence) for sequence in batch_of_sequence]) 
+    return [sequence+[word2int['<PAD>']]]
