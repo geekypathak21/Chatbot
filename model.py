@@ -6,7 +6,7 @@ Created on Tue Jan 15 01:08:45 2019
 @author: himanshu
 """
 
-import tensoflow as tf
+import tensorflow as tf
 import numpy as np
 
 #Building the seq2seq model
