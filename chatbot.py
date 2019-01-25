@@ -13,7 +13,7 @@ import numpy as np
 import tensorflow as tf
 import re 
 import time
-from model import Model
+from model import seq2seq_model,model_inputs
 #Importing the dataset
 lines = open('movie_lines.txt', encoding = 'utf-8', errors = 'ignore' ).read().split('\n')
 conversations = open('movie_conversations.txt', encoding = 'utf-8', errors = 'ignore' ).read().split('\n')
@@ -157,7 +157,7 @@ tf.reset_default_graph()
 session = tf.InteractiveSession()
 
 #Loading the model inputs
-inputs, targets, lr, keep_prob = Model.model_inputs(Model)
+inputs, targets, lr, keep_prob = model_inputs()
 
 #Setting the sequence length
 sequence_length = tf.placeholder_with_default(25, None, name = 'sequence_length')
@@ -166,17 +166,18 @@ sequence_length = tf.placeholder_with_default(25, None, name = 'sequence_length'
 input_shape = tf.shape(inputs)
 
 #Getting the training and test predictions
-training_predictions, test_predictions = Model.seq2seq_model(tf.reverse(inputs[-1]),
-                                                             keep_prob,
-                                                             batch_size,
-                                                             sequence_length,
-                                                             len(answerwords2int),
-                                                             len(questionwords2int),
-                                                             encoding_embedding_size,
-                                                             decoding_embedding_size,
-                                                             rnn_size,
-                                                             num_layers,
-                                                             questionwords2int)
+training_predictions, test_predictions = seq2seq_model(tf.reverse(inputs, [-1]),
+                                                       targets,
+                                                       keep_prob,
+                                                       batch_size,
+                                                       sequence_length,
+                                                       len(answerwords2int),
+                                                       len(questionwords2int),
+                                                       encoding_embedding_size,
+                                                       decoding_embedding_size,
+                                                       rnn_size,
+                                                       num_layers,
+                                                       questionwords2int)
 #Setting up the loss error,the optimizer gradient clipping
 with tf.name_scope("optimization"):
     loss_error = tf.contrib.seq2seq.Sequence_loss(training_predictions,targets,tf.ones([input_shape[0],sequence_length]))
