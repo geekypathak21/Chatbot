@@ -6,7 +6,7 @@ Created on Sun Jan 13 02:28:59 2019
 @author: himanshu
 """
 
-#Creating My first chatbot
+# Creating My first chatbot
  
 #Importing the libraries
 import numpy as np
@@ -72,31 +72,32 @@ for answer in answers:
     clean_answers.append(clean_text(answer))
 #Creating a dictionary that maps each word to its number of occurences
 words2count = {}
-for questions in clean_question:
-    for word in questions.split():
+for question in clean_question:
+    for word in question.split():
         if word not in words2count:
             words2count[word] = 1
         else:
             words2count[word]+=1
 for answer in clean_answers:
-    for word in questions.split():
+    for word in answer.split():
         if word not in words2count:
             words2count[word] = 1
         else:
             words2count[word]+=1     
 #Creating two dictionaries that maps question words and the answer words to a unique integer
-threshold=20
+threshold_questions = 20
 questionwords2int = {}
 word_number = 0
 for word,count in words2count.items():
-    if count>=threshold:
-        questionwords2int[word]=word_number
+    if count>=threshold_questions:
+        questionwords2int[word] = word_number
         word_number+=1
+threshold_answers = 20        
 answerwords2int = {}
 word_number = 0
 for word,count in words2count.items():
-    if count>=threshold:
-        answerwords2int[word]=word_number
+    if count>=threshold_answers:
+        answerwords2int[word] = word_number
         word_number+=1
 
 #Adding the last tokens to these dictionaries
@@ -183,20 +184,20 @@ with tf.name_scope("optimization"):
     loss_error = tf.contrib.seq2seq.Sequence_loss(training_predictions,targets,tf.ones([input_shape[0],sequence_length]))
     optimizer = tf.train.AdamOptimizer(learning_rate)
     gradients = optimizer.compute_gradients(loss_error)
-    clipped_gradients = [((tf.clip_by_value(grad_tensor),-5.,5.),grad_variable) for grad_tensor,grad_variable in gradients if grad_tensor is not None]
+    clipped_gradients = [(tf.clip_by_value(grad_tensor,-5.,5.),grad_variable) for grad_tensor,grad_variable in gradients if grad_tensor is not None]
     optimizer_gradient_clipping = optimizer.apply_gradients(clipped_gradients)
 #Padding the sequence with the <PAD> token
 def apply_padding(batch_of_sequences, word2int):
-    max_sequence_length = max([(sequence) for sequence in batch_of_sequences]) 
+    max_sequence_length = max([len(sequence) for sequence in batch_of_sequences]) 
     return [sequence + [word2int['<PAD>']] * (max_sequence_length - len(sequence)) for sequence in batch_of_sequences]
 #Splitting the data into batches of questions and answers
 def split_into_batches(questions, answers, batchsize):
     for batch_index in range (0, len(questions)//batch_size):
         start_index = batch_index*batch_size
-        question_in_batch = questions[start_index:start_index+batch_size]
-        answer_in_batch = answers[start_index:start_index+batch_size]
+        question_in_batch = questions[ start_index : start_index+batch_size]
+        answer_in_batch = answers[start_index : start_index+batch_size]
         padded_question_in_batch = np.array(apply_padding(question_in_batch, questionwords2int))
-        padded_answers_in_batch = np.array(apply_padding(answer_in_batch, questionwords2int))
+        padded_answers_in_batch = np.array(apply_padding(answer_in_batch, answerwords2int))
         yield padded_question_in_batch, padded_answers_in_batch 
 #Splitting the question and answers into training and validation sets
 training_validation_split = int(len(sorted_clean_questions)*0.15)
@@ -261,4 +262,3 @@ for epochs in range(1, epochs+1):
         print("My apologies, I cannot speak better anymore. This is the best I can do.")
         break
 print("Game Over")
-        
