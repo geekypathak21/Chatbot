@@ -1,6 +1,6 @@
 # Chatbot in TensorFlow 1.0
 
-The example on how to implement simple chatbot using seq2seq model in the python using tensorflow 1.0 version. In this chatbot I used attention mechanism
+The example on how to implement simple chatbot using seq2seq model in the python using tensorflow 1.0 version. In this chatbot I used attention mechanism. If you want to get more information about seq2seq model read this blog : [here](https://seq2seq.blogspot.com/)
 
 ## Dataset
 
